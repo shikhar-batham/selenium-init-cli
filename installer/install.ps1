@@ -1,6 +1,6 @@
 Write-Host "Installing Selenium Init CLI..."
 
-# USER SAFE PATH (NO ADMIN)
+# SAFE USER LOCATION (NO ADMIN)
 $installHome = Join-Path $env:LOCALAPPDATA "SeleniumInit"
 $binDir = Join-Path $installHome "bin"
 
