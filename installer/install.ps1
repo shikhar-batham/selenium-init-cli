@@ -1,36 +1,40 @@
-# install.ps1
-$ErrorActionPreference = "Stop"
-
 Write-Host "Installing Selenium Init CLI..."
 
-$installDir = "$env:ProgramFiles\SeleniumInit"
-$binDir = "$installDir\bin"
+# -------- Paths (USER-SAFE) --------
+$installRoot = "$env:LOCALAPPDATA\Programs\SeleniumInit"
+$binDir = "$installRoot\bin"
+$jarName = "selenium-init-1.0.0.jar"
 
-# Create directories
+$downloadUrl = "https://github.com/shikhar-batham/selenium-init-cli/releases/download/v1.0.0/$jarName"
+
+# -------- Create dirs --------
 New-Item -ItemType Directory -Force -Path $binDir | Out-Null
 
-# Download main script
-$cliUrl = "https://raw.githubusercontent.com/shikhar-batham/selenium-init-cli/main/selenium-init.ps1"
-$cliPath = "$binDir\selenium-init.ps1"
+# -------- Download JAR --------
+$jarPath = "$installRoot\$jarName"
+if (-not (Test-Path $jarPath)) {
+    Invoke-WebRequest -Uri $downloadUrl -OutFile $jarPath -UseBasicParsing
+}
 
-Invoke-WebRequest $cliUrl -OutFile $cliPath -UseBasicParsing
+# -------- Create CMD shim --------
+$cmdPath = "$binDir\selenium-init.cmd"
 
-# Create CMD shim
-$cmdShim = "$binDir\selenium-init.cmd"
 @"
 @echo off
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0selenium-init.ps1" %*
-"@ | Set-Content -Encoding ASCII $cmdShim
+java -jar "$jarPath" %*
+"@ | Set-Content -Encoding ASCII $cmdPath
 
-# Add to PATH
-$envPath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
-if ($envPath -notlike "*$binDir*") {
+# -------- Add to USER PATH (silent-safe) --------
+$existingPath = [Environment]::GetEnvironmentVariable("Path", "User")
+
+if ($existingPath -notlike "*$binDir*") {
     [Environment]::SetEnvironmentVariable(
-        "PATH",
-        "$envPath;$binDir",
-        "Machine"
+            "Path",
+            "$existingPath;$binDir",
+            "User"
     )
 }
 
 Write-Host "Selenium Init CLI installed successfully."
+Write-Host "Restart terminal to use: selenium-init"
 exit 0
