@@ -1,39 +1,34 @@
-Write-Host "Installing Selenium Init CLI..."
+$ErrorActionPreference = "Stop"
 
-# SAFE USER LOCATION (NO ADMIN)
-$installHome = Join-Path $env:LOCALAPPDATA "SeleniumInit"
-$binDir = Join-Path $installHome "bin"
-
+$installRoot = Join-Path $env:LOCALAPPDATA "SeleniumInit"
+$binDir = Join-Path $installRoot "bin"
 $jarName = "selenium-init-1.0.0.jar"
-$jarPath = Join-Path $installHome $jarName
+$jarPath = Join-Path $installRoot $jarName
+$cmdPath = Join-Path $binDir "selenium-init.cmd"
 
 $downloadUrl = "https://github.com/shikhar-batham/selenium-init-cli/releases/download/v1.0.0/$jarName"
 
-# Create directories
+# Create dirs
 New-Item -ItemType Directory -Force -Path $binDir | Out-Null
 
-# Download JAR
-if (!(Test-Path $jarPath)) {
-    Write-Host "Downloading Selenium Init CLI..."
+# Download jar
+if (-not (Test-Path $jarPath)) {
     Invoke-WebRequest -Uri $downloadUrl -OutFile $jarPath
 }
 
-# Create command
-$cmdFile = Join-Path $binDir "selenium-init.cmd"
-@"
-@echo off
-java -jar "$jarPath" %*
-"@ | Out-File -Encoding ASCII $cmdFile
+# Create cmd wrapper
+"@echo off`r`njava -jar `"$jarPath`" %*" | Set-Content -Encoding ASCII $cmdPath
 
-# Add to USER PATH
-$userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-if ($userPath -notlike "*$binDir*") {
-    [Environment]::SetEnvironmentVariable(
-            "PATH",
-            "$userPath;$binDir",
-            "User"
-    )
+# Add PATH only if not winget
+if (-not $env:WINGET_INSTALLER_CONTEXT) {
+    $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+    if ($userPath -notlike "*$binDir*") {
+        [Environment]::SetEnvironmentVariable(
+                "PATH",
+                "$userPath;$binDir",
+                "User"
+        )
+    }
 }
 
-Write-Host "Installation complete."
-Write-Host "Restart terminal and run: selenium-init --help"
+exit 0
