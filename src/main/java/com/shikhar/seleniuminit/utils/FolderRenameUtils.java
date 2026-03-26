@@ -11,10 +11,8 @@ public class FolderRenameUtils {
 
         String packagePath = basePackage.replace(".", File.separator);
 
-        Path templateRoot = root.resolve("selenium-java-template");
-
-        rename(templateRoot.resolve("src/main/java"), packagePath);
-        rename(templateRoot.resolve("src/test/java"), packagePath);
+        rename(root.resolve("src/main/java"), packagePath);
+        rename(root.resolve("src/test/java"), packagePath);
     }
 
     private static void rename(Path javaRoot, String packagePath) throws IOException {

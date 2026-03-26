@@ -21,6 +21,5 @@ public class Main {
             System.out.println("Failed to create project");
             e.printStackTrace();
         }
-
     }
 }

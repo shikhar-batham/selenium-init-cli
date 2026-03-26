@@ -16,7 +16,7 @@ public class ProjectGenerator {
         Path targetDir = Paths.get(projectName);
 
         if (Files.exists(targetDir)) {
-            throw new RuntimeException("❌ Folder already exists: " + projectName);
+            throw new RuntimeException("Folder already exists: " + projectName);
         }
 
         Files.createDirectories(targetDir);
@@ -26,7 +26,7 @@ public class ProjectGenerator {
                 .getResourceAsStream("template/selenium-java-template.zip");
 
         if (zipStream == null) {
-            throw new RuntimeException("❌ Template ZIP not found");
+            throw new RuntimeException("Template ZIP not found");
         }
 
         ZipUtils.unzip(zipStream, targetDir);

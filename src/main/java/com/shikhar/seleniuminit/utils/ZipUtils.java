@@ -15,8 +15,25 @@ public class ZipUtils {
         try (ZipInputStream zis = new ZipInputStream(zipStream)) {
             ZipEntry entry;
 
+            String rootFolder = null;
+
             while ((entry = zis.getNextEntry()) != null) {
-                Path newPath = targetDir.resolve(entry.getName());
+
+                String entryName = entry.getName();
+
+                // Detect root folder
+                if (rootFolder == null) {
+                    rootFolder = entryName.split("/")[0];
+                }
+
+                // Remove root folder repeatedly if duplicated
+                while (entryName.startsWith(rootFolder + "/")) {
+                    entryName = entryName.substring(rootFolder.length() + 1);
+                }
+
+                if (entryName.isEmpty()) continue;
+
+                Path newPath = targetDir.resolve(entryName);
 
                 if (entry.isDirectory()) {
                     Files.createDirectories(newPath);
